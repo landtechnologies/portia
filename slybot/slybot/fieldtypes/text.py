@@ -4,8 +4,9 @@ Text types
 import re
 from scrapely.extractors import text as extract_text, safehtml
 from w3lib.html import remove_tags
+from lxml import html
+import urllib
 _REMOVE_TAGID = re.compile(' data-tagid="\d+"').sub
-
 
 class _BaseTextProcessor(object):
     """basic text processor, defines identity functions, some of which
@@ -88,3 +89,19 @@ class SafeHtmlFieldTypeProcessor(_BaseTextProcessor):
     def adapt(self, text, htmlpage=None):
         """Remove html markup"""
         return safehtml(text)
+
+
+class PageLinkFieldTypeProcessor(_BaseTextProcessor):
+    name = 'page link'
+    description = 'Extracts url from certain fields which points to the next page'
+
+    def extract(self, htmlregion):
+        if urllib.parse.urlparse(htmlregion).scheme != "" or htmlregion.strip().startswith('/'):
+            # Already is url
+            return htmlregion
+        else:
+            tree = html.fromstring(htmlregion)
+            hrefs = tree.xpath('//a[1]/@href')
+            print(hrefs)
+            if len(hrefs):
+                return hrefs[0]

@@ -1,47 +1,58 @@
-import Ember from 'ember';
-import SaveSpiderMixin from '../mixins/save-spider-mixin';
-const { computed, inject: { service } } = Ember;
+import Ember from "ember";
+import SaveSpiderMixin from "../mixins/save-spider-mixin";
+const {
+    computed,
+    inject: { service }
+} = Ember;
 
 export default Ember.Component.extend(SaveSpiderMixin, {
-    routing: service('-routing'),
-    tagName: '',
+    routing: service("-routing"),
+    tagName: "",
 
     spider: null,
 
     followPatternOptions: [
         {
-            value: 'auto',
-            label: 'Follow links automatically',
+            value: "auto",
+            label: "Follow links automatically",
             description: `Use start urls and sample urls to teach the spider the \
                           best links to follow`
         },
         {
-            value: 'all',
-            label: 'Follow all in-domain links',
+            value: "all",
+            label: "Follow all in-domain links",
             description: `Follow all links which have a domain or sub domain that match \
                           the start or sample urls`
         },
         {
-            value: 'none',
+            value: "none",
             label: "Don't follow links",
             description: `Only attempt to extract data from start urls. Can be combined \
                           to great effect with feed and generated urls`
         },
         {
-            value: 'patterns',
-            label: 'Configure url patterns',
+            value: "patterns",
+            label: "Configure url patterns",
             description: `Create patterns for the spider to follow or not and direct your \
                           spider with pin point accuracy`
         },
+        {
+            value: "pre-set",
+            label: "Pre-set path",
+            description: `Follow a pre-determined path`
+        }
     ],
 
-    linksToFollow: computed('spider.linksToFollow', {
+    linksToFollow: computed("spider.linksToFollow", {
         get() {
-            return this.followPatternOptions.findBy('value', this.get('spider.linksToFollow'));
+            return this.followPatternOptions.findBy(
+                "value",
+                this.get("spider.linksToFollow")
+            );
         },
 
         set(key, value) {
-            this.set('spider.linksToFollow', value.value);
+            this.set("spider.linksToFollow", value.value);
             return value;
         }
     }),
@@ -49,11 +60,21 @@ export default Ember.Component.extend(SaveSpiderMixin, {
     actions: {
         saveSpider() {
             this.saveSpider().then(() => {
-                if (this.get('linksToFollow.value') === 'patterns') {
-                    this.get('routing').transitionTo('projects.project.spider.link-options');
-                } else if (this.get('linksToFollow.value') === 'none' &&
-                        this.get('routing.currentRouteName').endsWith('link-options')) {
-                    this.get('routing').transitionTo('projects.project.spider');
+                if (
+                    this.get("linksToFollow.value") === "patterns" ||
+                    this.get("linksToFollow.value") === "pre-set"
+                ) {
+                    this.get("routing").transitionTo(
+                        "projects.project.spider.link-options"
+                    );
+                    console.log("Hello");
+                } else if (
+                    this.get("linksToFollow.value") === "none" &&
+                    this.get("routing.currentRouteName").endsWith(
+                        "link-options"
+                    )
+                ) {
+                    this.get("routing").transitionTo("projects.project.spider");
                 }
             });
         }

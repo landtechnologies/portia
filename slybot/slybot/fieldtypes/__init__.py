@@ -14,7 +14,8 @@ and provide error messages.
 from .text import (
     RawFieldTypeProcessor,
     TextFieldTypeProcessor,
-    SafeHtmlFieldTypeProcessor
+    SafeHtmlFieldTypeProcessor,
+    PageLinkFieldTypeProcessor
 )
 from .images import ImagesFieldTypeProcessor
 from .url import UrlFieldTypeProcessor
@@ -30,7 +31,7 @@ class FieldTypeManager(object):
         ImagesFieldTypeProcessor, NumberTypeProcessor,
         UrlFieldTypeProcessor, SafeHtmlFieldTypeProcessor,
         GeoPointFieldTypeProcessor, PriceTypeProcessor,
-        DateTimeFieldTypeProcessor
+        DateTimeFieldTypeProcessor, PageLinkFieldTypeProcessor
     ))
     _names = sorted(_TYPEMAP.keys())
 

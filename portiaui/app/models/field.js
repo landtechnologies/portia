@@ -1,14 +1,24 @@
-import DS from 'ember-data';
-import BaseModel from './base';
+import DS from "ember-data";
+import BaseModel from "./base";
 
 export const FIELD_TYPES = [
-    'date', 'geopoint', 'image', 'number', 'price', 'raw html', 'safe html', 'text', 'url'];
+    "date",
+    "geopoint",
+    "image",
+    "number",
+    "price",
+    "raw html",
+    "safe html",
+    "text",
+    "url",
+    "page link"
+];
 
 export default BaseModel.extend({
-    name: DS.attr('string'),
-    type: DS.attr('string'),
-    required: DS.attr('boolean'),
-    vary: DS.attr('boolean'),
+    name: DS.attr("string"),
+    type: DS.attr("string"),
+    required: DS.attr("boolean"),
+    vary: DS.attr("boolean"),
     schema: DS.belongsTo({
         async: true
     }),

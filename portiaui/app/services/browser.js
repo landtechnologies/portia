@@ -1,9 +1,9 @@
-import Ember from 'ember';
+import Ember from "ember";
 const { computed } = Ember;
-import { cleanUrl, renameAttr } from '../utils/utils';
+import { cleanUrl, renameAttr } from "../utils/utils";
 
-export const NAVIGATION_MODE = 'navigation';
-export const ANNOTATION_MODE = 'data-annotation';
+export const NAVIGATION_MODE = "navigation";
+export const ANNOTATION_MODE = "data-annotation";
 export const INTERACTION_MODES = new Set([ANNOTATION_MODE]);
 export const DEFAULT_MODE = NAVIGATION_MODE;
 
@@ -75,142 +75,158 @@ export default Ember.Service.extend(Ember.Evented, {
     baseurl: null,
     validUrl: true,
 
-    invalidUrl: computed.not('validUrl'),
+    invalidUrl: computed.not("validUrl"),
 
-    disabled: Ember.computed('_disabled', 'webSocket.closed', 'mode', {
+    disabled: Ember.computed("_disabled", "webSocket.closed", "mode", {
         get() {
-            return this.get('_disabled') || this.get('webSocket.closed') ||
-                this.get('mode') !== NAVIGATION_MODE;
+            return (
+                this.get("_disabled") ||
+                this.get("webSocket.closed") ||
+                this.get("mode") !== NAVIGATION_MODE
+            );
         },
 
         set(key, value) {
-            this.set('_disabled', value);
-            return value || this.get('webSocket.closed') || this.get('mode') !== NAVIGATION_MODE;
+            this.set("_disabled", value);
+            return (
+                value ||
+                this.get("webSocket.closed") ||
+                this.get("mode") !== NAVIGATION_MODE
+            );
         }
     }),
-    isInteractionMode: Ember.computed('mode', function() {
-        return INTERACTION_MODES.has(this.get('mode'));
+    isInteractionMode: Ember.computed("mode", function() {
+        return INTERACTION_MODES.has(this.get("mode"));
     }),
-    url: Ember.computed('_url', {
+    url: Ember.computed("_url", {
         get() {
-            return this.get('_url');
+            return this.get("_url");
         },
 
         set(key, value) {
             return this.go(value);
         }
     }),
-    $document: Ember.computed('document', function() {
-        const document = this.get('document');
+    $document: Ember.computed("document", function() {
+        const document = this.get("document");
         return document ? Ember.$(document) : null;
     }),
 
     init() {
         this._super(...arguments);
-        this.on('contentChanged', () => {
+        this.on("contentChanged", () => {
             Ember.run.next(() => {
-                Ember.run.scheduleOnce('sync', this, 'checkCSS');
+                Ember.run.scheduleOnce("sync", this, "checkCSS");
             });
         });
     },
 
-    resetUrl: Ember.observer('document', function() {
-        if (!this.get('document')) {
+    resetUrl: Ember.observer("document", function() {
+        if (!this.get("document")) {
             this.setProperties({
-                '_url': null,
-                'baseurl': null
+                _url: null,
+                baseurl: null
             });
         }
     }),
 
     invalidateUrl() {
-        this.set('validUrl', false);
+        this.set("validUrl", false);
     },
 
     go(url) {
-        this.set('validUrl', true);
-        const currentUrl = this.get('_url');
+        this.set("validUrl", true);
+        const currentUrl = this.get("_url");
         url = cleanUrl(url);
         if (url && url !== currentUrl) {
             this._extract();
 
             this.beginPropertyChanges();
             if (currentUrl) {
-                this.get('backBuffer').pushObject(currentUrl);
+                this.get("backBuffer").pushObject(currentUrl);
             }
-            this.set('_url', url);
-            this.set('forwardBuffer', []);
+            this.set("_url", url);
+            this.set("forwardBuffer", []);
             this.endPropertyChanges();
         }
         return url;
     },
 
     back() {
-        this._updateBuffers(this.get('backBuffer'),
-                            this.get('forwardBuffer'));
+        this._updateBuffers(this.get("backBuffer"), this.get("forwardBuffer"));
     },
 
     forward() {
-        this._updateBuffers(this.get('forwardBuffer'),
-                            this.get('backBuffer'));
+        this._updateBuffers(this.get("forwardBuffer"), this.get("backBuffer"));
     },
 
     reload() {
-        this.notifyPropertyChange('_url');
+        this.notifyPropertyChange("_url");
     },
 
     checkCSS() {
-        const $iframe = this.get('$document');
-        const $showMetaStyleElement = $iframe.find('style[title="portia-show-meta"]');
+        const $iframe = this.get("$document");
+        const $showMetaStyleElement = $iframe.find(
+            'style[title="portia-show-meta"]'
+        );
         const cssEnabled = !$showMetaStyleElement.length;
-        this.set('cssEnabled', cssEnabled);
+        this.set("cssEnabled", cssEnabled);
     },
 
     disableCSS() {
-        if (![ANNOTATION_MODE].includes(this.get('mode'))) {
+        if (![ANNOTATION_MODE].includes(this.get("mode"))) {
             return;
         }
 
-        const iframe = this.get('document');
-        if (this.get('cssEnabled') && iframe) {
-            const $iframe = this.get('$document');
+        const iframe = this.get("document");
+        if (this.get("cssEnabled") && iframe) {
+            const $iframe = this.get("$document");
             const $styles = $iframe.find(
-                'style:not([title="portia-show-meta"]), link[rel="stylesheet"]');
-            renameAttr($styles, 'media', 'data-portia-hidden-media');
+                'style:not([title="portia-show-meta"]), link[rel="stylesheet"]'
+            );
+            renameAttr($styles, "media", "data-portia-hidden-media");
             // disable stylesheets using an impossible media query
-            $styles.attr('media', '(width: -1px)');
-            renameAttr($iframe.find('[style]'), 'style', 'data-portia-hidden-style');
-            $iframe.find('body').append(META_STYLE); // jshint ignore:line
-            this.set('cssEnabled', false);
+            $styles.attr("media", "(width: -1px)");
+            renameAttr(
+                $iframe.find("[style]"),
+                "style",
+                "data-portia-hidden-style"
+            );
+            $iframe.find("body").append(META_STYLE); // jshint ignore:line
+            this.set("cssEnabled", false);
         }
     },
 
     enableCSS() {
-        if (![ANNOTATION_MODE].includes(this.get('mode'))) {
+        if (![ANNOTATION_MODE].includes(this.get("mode"))) {
             return;
         }
 
-        const iframe = this.get('document');
-        if (!this.get('cssEnabled') && iframe) {
-            const $iframe = this.get('$document');
+        const iframe = this.get("document");
+        if (!this.get("cssEnabled") && iframe) {
+            const $iframe = this.get("$document");
             $iframe.find('style[title="portia-show-meta"]').remove();
             const $styles = $iframe.find(
-                'style:not([title="portia-show-meta"]), link[rel="stylesheet"]');
-            $styles.attr('media', null);
-            renameAttr($styles, 'data-portia-hidden-media', 'media');
-            renameAttr($iframe.find('[data-portia-hidden-style]'),
-                                    'data-portia-hidden-style', 'style');
-            this.set('cssEnabled', true);
+                'style:not([title="portia-show-meta"]), link[rel="stylesheet"]'
+            );
+            $styles.attr("media", null);
+            renameAttr($styles, "data-portia-hidden-media", "media");
+            renameAttr(
+                $iframe.find("[data-portia-hidden-style]"),
+                "data-portia-hidden-style",
+                "style"
+            );
+            this.set("cssEnabled", true);
         }
     },
 
     setAnnotationMode() {
-        this.set('mode', ANNOTATION_MODE);
+        this.set("mode", ANNOTATION_MODE);
     },
 
     clearAnnotationMode() {
-        if (this.get('mode') === ANNOTATION_MODE) {
-            this.set('mode', DEFAULT_MODE);
+        if (this.get("mode") === ANNOTATION_MODE) {
+            this.set("mode", DEFAULT_MODE);
             this.enableCSS();
         }
     },
@@ -218,18 +234,18 @@ export default Ember.Service.extend(Ember.Evented, {
     _updateBuffers(currentBuffer, otherBuffer) {
         if (currentBuffer.length) {
             this.beginPropertyChanges();
-            otherBuffer.pushObject(this.get('_url'));
+            otherBuffer.pushObject(this.get("_url"));
             const url = currentBuffer.popObject();
             this._extract();
             this.setProperties({
-                '_url': url,
-                'baseurl': null
+                _url: url,
+                baseurl: null
             });
             this.endPropertyChanges();
         }
     },
 
     _extract() {
-        this.get('extractedItems').activateExtraction();
+        this.get("extractedItems").activateExtraction();
     }
 });

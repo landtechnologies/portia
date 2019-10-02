@@ -1,9 +1,9 @@
-import Ember from 'ember';
-import { FIELD_TYPES } from '../models/field';
-import ensurePromise from '../utils/ensure-promise';
+import Ember from "ember";
+import { FIELD_TYPES } from "../models/field";
+import ensurePromise from "../utils/ensure-promise";
 
 export default Ember.Component.extend({
-    tagName: '',
+    tagName: "",
 
     field: null,
 
@@ -11,7 +11,7 @@ export default Ember.Component.extend({
 
     actions: {
         saveField() {
-            const field = this.get('field');
+            const field = this.get("field");
             ensurePromise(field).then(field => {
                 if (!!field) {
                     field.save();

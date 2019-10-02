@@ -35,7 +35,6 @@ _CLEAN_ANNOTATED_HTML = re.compile('( data-scrapy-[a-z]+="[^"]+")|'
 _ID_RE = re.compile('-'.join(['[a-f0-9]{4}'] * 3), re.I)
 FIELD_TYPES = FieldTypeManager().available_type_names()
 
-
 class Project(Model):
     # TODO: override storage for hosted version, return generated project.json
     id = String(primary_key=True, validate=Length(min=1, max=248))
@@ -222,7 +221,7 @@ class Spider(Model):
     id = String(primary_key=True, validate=Length(min=1, max=243))
     start_urls = List(Nested(StartUrl))
     links_to_follow = String(default='all', validate=OneOf(
-        ['none', 'patterns', 'all', 'auto']))
+        ['none', 'patterns', 'all', 'auto','pre-set']))
     allowed_domains = List(Domain)
     respect_nofollow = Boolean(default=True)
     follow_patterns = List(Regexp)
